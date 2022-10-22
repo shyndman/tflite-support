@@ -24,6 +24,9 @@ TfLiteBaseOptions CreateDefaultBaseOptions() {
   base_options.compute_settings.cpu_settings.num_threads = -1;
   base_options.compute_settings.coreml_delegate_settings.enable_delegate =
       false;
+  base_options.compute_settings.coral_delegate_settings.enable_delegate =
+      false;
+
   return base_options;
 }
 
@@ -41,6 +44,7 @@ TfLiteBaseOptions CreateDefaultBaseOptions() {
   tflite_settings.mutable_cpu_settings()->set_num_threads(
       c_options->cpu_settings.num_threads);
 
+  // CoreML Delegate
   if (c_options->coreml_delegate_settings.enable_delegate) {
     tflite_settings.set_delegate(::tflite::proto::Delegate::CORE_ML);
     switch (c_options->coreml_delegate_settings.enabled_devices) {
@@ -52,6 +56,31 @@ TfLiteBaseOptions CreateDefaultBaseOptions() {
         tflite_settings.mutable_coreml_settings()->set_enabled_devices(
             ::tflite::proto::CoreMLSettings::DEVICES_WITH_NEURAL_ENGINE);
         break;
+    }
+  }
+  // Coral Edge TPU Delegate
+  else if (c_options->coral_delegate_settings.enable_delegate) {
+    tflite_settings.set_delegate(::tflite::proto::Delegate::EDGETPU_CORAL);
+
+    if (c_options->coral_delegate_settings.device) {
+      tflite_settings.mutable_coral_settings()->set_device(
+          c_options->coral_delegate_settings.device);
+    }
+
+    if (c_options->coral_delegate_settings.performance) {
+      tflite_settings.mutable_coral_settings()->set_performance(
+          static_cast<::tflite::proto::CoralSettings_Performance>(
+              c_options->coral_delegate_settings.performance));
+    }
+
+    if (c_options->coral_delegate_settings.usb_always_dfu) {
+      tflite_settings.mutable_coral_settings()->set_usb_always_dfu(
+          c_options->coral_delegate_settings.usb_always_dfu);
+    }
+
+    if (c_options->coral_delegate_settings.usb_max_bulk_in_queue_length) {
+      tflite_settings.mutable_coral_settings()->set_usb_max_bulk_in_queue_length(
+          c_options->coral_delegate_settings.usb_max_bulk_in_queue_length);
     }
   }
 

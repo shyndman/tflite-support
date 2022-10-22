@@ -56,12 +56,43 @@ typedef struct TfLiteCoreMLDelegateSettings {
   int32_t coreml_version;
 } TfLiteCoreMLDelegateSettings;
 
+typedef enum TfLiteCoralSettingsPerformance {
+  kPerformanceUndefined = 0,
+  kPerformanceMaximum = 1,
+  kPerformanceHigh = 2,
+  kPerformanceMedium = 3,
+  kPerformanceLow = 4,
+} TfLiteCoralSettingsPerformance;
+
+// Holds Coral Edge TPU Delegate settings.
+typedef struct TfLiteCoralSettings {
+  // Enables the Coral delegate.
+  bool enable_delegate;
+  // The Edge Tpu device to be used. See
+  // https://github.com/google-coral/libcoral/blob/982426546dfa10128376d0c24fd8a8b161daac97/coral/tflite_utils.h#L131-L137
+  const char* device;
+  // The desired performance level. This setting adjusts the internal clock
+  // rate to achieve different performance / power balance. Higher performance
+  // values improve speed, but increase power usage.
+  TfLiteCoralSettingsPerformance performance;
+  // If true, always perform device firmware update (DFU) after reset. DFU is
+  // usually only necessary after power cycle.
+  bool usb_always_dfu;
+  // The maximum bulk in queue length. Larger queue length may improve USB
+  // performance on the direction from device to host. When not specified (or
+  // zero), `usb_max_bulk_in_queue_length` will default to 32 according to the
+  // current EdgeTpu Coral implementation.
+  int32_t usb_max_bulk_in_queue_length;
+} TfLiteCoralSettings;
+
 // Holds settings for one possible acceleration configuration.
 typedef struct TfLiteComputeSettings {
   // Holds cpu settings.
   TfLiteCpuSettings cpu_settings;
   // Holds Core ML Delegate settings.
   TfLiteCoreMLDelegateSettings coreml_delegate_settings;
+  // Holds Coral Edge TPU Delegate settings.
+  TfLiteCoralSettings coral_delegate_settings;
 } TfLiteComputeSettings;
 
 // Represents external files used by the Task APIs (e.g. TF Lite Model File).
